@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equestrian Small Business Economics & Survival Analysis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#FBF9F5',
+                        sand: '#F4EFE6',
+                        taupe: '#E3DAC9',
+                        slate: '#2C3531',
+                        forest: '#3B5249',
+                        rust: '#B85B35',
+                        ochre: '#C88A35',
+                        mutedBorder: '#D8CFC4'
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Dedicated Chart Container Styles for Strict Aspect Ratio & Boundary Control */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #B85B35;
+            color: #2C3531;
+            font-weight: 600;
+            background-color: rgba(184, 91, 53, 0.05);
+        }
+        /* Hide scrollbars for clean UI while maintaining scrolling functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-cream text-slate font-sans antialiased min-h-screen flex flex-col selection:bg-rust selection:text-white">
+
+    <!-- Chosen Palette: Warm Equestrian Neutral (Background: #FBF9F5 Cream, Cards: #F4EFE6 Sand, Primary Text/Headers: #2C3531 Slate, Accent/Highlight: #B85B35 Rust & #3B5249 Forest) -->
+    
+    <!-- Application Structure Plan:
+        1. Header & Navigation: Fixed top navigation with smooth-switching tabbed views (Executive Overview, Business Survival Stats, Entity Structure Matrix, Bay Area Macro Headwinds, Equestrian Microeconomics, Interactive Simulator).
+        2. Executive Overview: High-impact statistical metrics, thesis introduction, and interactive key takeaways.
+        3. Business Survival Stats: Longitudinal BLS/SBA data visualized via interactive dynamic charts, Cash Flow Asphyxiation interactive breakdown, Receivables Trap & Growth Paradox modals/cards.
+        4. Entity Structure Matrix: Comparative visual breakdown between W-2 Corporate Executives, Trust Fund Beneficiaries, and Sole Proprietorships ($200k Revenue vs Take-Home Net Income visualizer).
+        5. Bay Area Macro Headwinds: Land Use & Williamson Act crisis, AB 1066 Labor Overtime Phase-In timeline, Workers' Comp Class 8631 analysis.
+        6. Equestrian Microeconomics: Fixed vs Variable Cost Pie Chart, Occupancy Sensitivity Curve, Veterinary Shortage data, and IRS Section 183 "Hobby Loss Rule" 9-Factor Audit Checklist.
+        7. Interactive Facility Survival Simulator: Live dynamic sandbox allowing users to adjust stall count, board rates, hay inflation, labor overtime, and occupancy to calculate actual Net Income, Profit Margin, and IRS Audit Risk Score.
+        Rationale: Rather than presenting a long, linear document, this structure allows non-experts, financial analysts, and entrepreneurs to explore macro concepts interactively, test real economic variables, and immediately grasp why operational continuity in this sector is a statistical marvel.
+    -->
+
+    <!-- Visualization & Content Choices:
+        - Longitudinal Survival: Chart.js Line Chart comparing US vs CA survival over 30 years (No SVG/Mermaid).
+        - Take-Home Pay Reality ($200k Gross): Chart.js Bar Chart contrasting Gross Revenue vs Net Retention across 3 legal entities.
+        - Equestrian Cost Breakdown: Chart.js Doughnut Chart detailing feed, labor, lease, utilities, admin allocations.
+        - Stall Occupancy Sensitivity: Dynamic Line Chart updating in real-time as users test occupancy rates against break-even thresholds.
+        - Interactive Simulator: Pure HTML5/Tailwind/JS inputs connected to live canvas charts and risk badges.
+        - NO SVG or Mermaid JS used. All visual elements built using styled Tailwind containers, Canvas, or Unicode icons.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-50 bg-cream/95 backdrop-blur border-b border-mutedBorder shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl">🐴</span>
+                    <div>
+                        <h1 class="font-serif font-bold text-lg sm:text-xl text-slate tracking-tight leading-tight">Equestrian Economics & Macro Analysis</h1>
+                        <p class="text-xs text-forest font-medium hidden sm:block">San Francisco Bay Area Small Business Survival Dashboard</p>
+                    </div>
+                </div>
+                <div class="hidden lg:flex space-x-1 font-medium text-sm">
+                    <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active px-3 py-2 rounded-t transition">Overview</button>
+                    <button onclick="switchTab('survival')" id="tab-survival" class="tab-btn px-3 py-2 rounded-t transition">Survival Stats</button>
+                    <button onclick="switchTab('entities')" id="tab-entities" class="tab-btn px-3 py-2 rounded-t transition">Entity Comparison</button>
+                    <button onclick="switchTab('headwinds')" id="tab-headwinds" class="tab-btn px-3 py-2 rounded-t transition">Bay Area Headwinds</button>
+                    <button onclick="switchTab('microeconomics')" id="tab-microeconomics" class="tab-btn px-3 py-2 rounded-t transition">Equestrian Micro</button>
+                    <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-3 py-2 rounded-t transition bg-rust/10 text-rust font-semibold">Live Simulator</button>
+                </div>
+                <!-- Mobile Nav Dropdown Button -->
+                <div class="lg:hidden">
+                    <select onchange="switchTab(this.value)" class="bg-sand border border-mutedBorder text-slate text-sm rounded-lg p-2 font-medium focus:ring-rust focus:border-rust">
+                        <option value="overview">Overview</option>
+                        <option value="survival">Survival Stats</option>
+                        <option value="entities">Entity Comparison</option>
+                        <option value="headwinds">Bay Area Headwinds</option>
+                        <option value="microeconomics">Equestrian Micro</option>
+                        <option value="simulator">⚡ Live Simulator</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ================= SECTION 1: OVERVIEW ================= -->
+        <section id="section-overview" class="space-y-8">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-sand/60 border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <div class="max-w-3xl">
+                    <span class="inline-block px-3 py-1 bg-forest/10 text-forest text-xs font-bold uppercase tracking-wider rounded-full mb-3">Executive Summary & Context</span>
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate mb-4">The Architecture of Small Business Survival</h2>
+                    <p class="text-slate/80 leading-relaxed text-sm sm:text-base mb-4">
+                        Understanding the financial realities of small business ownership requires separating cultural myths of entrepreneurship from stark macroeconomic data. This dashboard translates comprehensive empirical research on small business mortality, California regulatory friction, and equestrian industry microeconomics into an interactive analytical tool.
+                    </p>
+                    <p class="text-slate/80 leading-relaxed text-sm sm:text-base">
+                        For observers accustomed to corporate compensation structures or wealth preservation models, the continuous cash flow pressure of a sole proprietor can seem perplexing. However, as demonstrated by longitudinal Bureau of Labor Statistics (BLS) data, sustaining a land-based, labor-intensive agricultural enterprise in the San Francisco Bay Area over decades is not stagnation—it is a statistical anomaly in the top decile of commercial longevity.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Key Metric Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-bold text-rust uppercase tracking-wide">10-Year Business Mortality</div>
+                    <div class="text-3xl font-serif font-bold text-slate mt-2 mb-1">64.5% - 65.7%</div>
+                    <p class="text-xs text-slate/70">Nearly two-thirds of all U.S. and California small businesses close permanently within 10 years.</p>
+                </div>
+                <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-bold text-rust uppercase tracking-wide">Primary Cause of Failure</div>
+                    <div class="text-3xl font-serif font-bold text-slate mt-2 mb-1">82%</div>
+                    <p class="text-xs text-slate/70">Of small business failures stem directly from cash flow mismanagement or timing asphyxiation.</p>
+                </div>
+                <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-bold text-forest uppercase tracking-wide">Zero Profit Sole Props</div>
+                    <div class="text-3xl font-serif font-bold text-slate mt-2 mb-1">31.2%</div>
+                    <p class="text-xs text-slate/70">Of the 31.1 million U.S. sole proprietorships report zero net profit on IRS tax filings.</p>
+                </div>
+                <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-bold text-ochre uppercase tracking-wide">30-Year Survival Rate</div>
+                    <div class="text-3xl font-serif font-bold text-slate mt-2 mb-1">12.6%</div>
+                    <p class="text-xs text-slate/70">Only ~1 in 8 establishments from the BLS 1994 cohort remain operational in 2025.</p>
+                </div>
+            </div>
+
+            <!-- Core Theoretical Pillars -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-sand/40 border border-mutedBorder rounded-xl p-6">
+                    <div class="text-2xl mb-3">👁️</div>
+                    <h3 class="font-serif font-bold text-lg text-slate mb-2">1. Survivorship Bias</h3>
+                    <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                        Public perception is distorted by the ultra-successful minority. The quiet attrition of millions of small enterprises goes unnoticed, masking the rigorous reality that business failure is the mathematical norm.
+                    </p>
+                </div>
+                <div class="bg-sand/40 border border-mutedBorder rounded-xl p-6">
+                    <div class="text-2xl mb-3">💧</div>
+                    <h3 class="font-serif font-bold text-lg text-slate mb-2">2. Profitability vs. Liquidity</h3>
+                    <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                        A business can be profitable on annual paper statements while suffering monthly "financial asphyxiation." The timing gap between outbound operating expenses and inbound receipts destroys viable businesses.
+                    </p>
+                </div>
+                <div class="bg-sand/40 border border-mutedBorder rounded-xl p-6">
+                    <div class="text-2xl mb-3">⚖️</div>
+                    <h3 class="font-serif font-bold text-lg text-slate mb-2">3. Asymmetric Structural Risk</h3>
+                    <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                        Corporate executives benefit from shielded liability and subsidized benefits. Trust fund beneficiaries rely on capital growth. Sole proprietors face 100% personal liability, 15.3% self-employment tax, and immediate revenue reinvestment requirements.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: SURVIVAL STATS ================= -->
+        <section id="section-survival" class="hidden space-y-8">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-sand/60 border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <span class="inline-block px-3 py-1 bg-rust/10 text-rust text-xs font-bold uppercase tracking-wider rounded-full mb-3">Part I: Empirical Survival Analysis</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate mb-3">Longitudinal Survival Rates & Cash Flow Dynamics</h2>
+                <p class="text-slate/80 leading-relaxed text-sm sm:text-base">
+                    This section presents longitudinal empirical data from the U.S. Bureau of Labor Statistics (BLS) Business Employment Dynamics program and the U.S. Small Business Administration (SBA). Explore the charts below to compare national and California survival baselines, and examine the core mechanics of cash flow volatility that claim over 80% of insolvent enterprises.
+                </p>
+            </div>
+
+            <!-- Survival Chart & Data Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div class="lg:col-span-7 bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-serif font-bold text-lg text-slate mb-1">U.S. vs. California Business Survival Over Time</h3>
+                    <p class="text-xs text-slate/70 mb-4">Percentage of establishments remaining active across operational milestones (BLS Longitudinal Data).</p>
+                    
+                    <div class="chart-container">
+                        <canvas id="survivalChart"></canvas>
+                    </div>
+                    <p class="text-xs text-slate/60 text-center mt-3">Data source: BLS Business Employment Dynamics & SBA Office of Advocacy (March 1994 - 2025 cohorts).</p>
+                </div>
+
+                <div class="lg:col-span-5 bg-sand/30 border border-mutedBorder rounded-2xl p-6 space-y-4">
+                    <h3 class="font-serif font-bold text-lg text-slate">Milestone Failure Rates</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-white p-3.5 rounded-xl border border-mutedBorder flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold text-slate">Year 1 Survival</div>
+                                <div class="text-xs text-slate/60">1 in 5 businesses fail immediately</div>
+                            </div>
+                            <span class="text-lg font-bold text-forest">78.0% - 79.6%</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-mutedBorder flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold text-slate">Year 5 Threshold</div>
+                                <div class="text-xs text-slate/60">Half of all ventures extinguished</div>
+                            </div>
+                            <span class="text-lg font-bold text-ochre">50.2% - 51.4%</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-mutedBorder flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold text-slate">Year 10 Mortality</div>
+                                <div class="text-xs text-slate/60">California mirrors national average</div>
+                            </div>
+                            <span class="text-lg font-bold text-rust">34.3% - 35.5%</span>
+                        </div>
+                        <div class="bg-white p-3.5 rounded-xl border border-mutedBorder flex justify-between items-center">
+                            <div>
+                                <div class="font-semibold text-slate">30-Year Survival Horizon</div>
+                                <div class="text-xs text-slate/60">Longitudinal cohort 1994-2025</div>
+                            </div>
+                            <span class="text-lg font-bold text-slate">12.6% - 14.8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Dive: Cash Flow Mechanics -->
+            <div class="bg-white border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+                <h3 class="font-serif font-bold text-xl text-slate">The Mechanics of Financial Asphyxiation</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-5 bg-sand/20 rounded-xl border border-mutedBorder/60">
+                        <div class="text-rust font-bold text-sm uppercase tracking-wide mb-2">1. The Receivables Trap</div>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                            Sole proprietors pay labor, feed, and overhead immediately, while client invoices lag 30 to 90 days. In the equestrian sector, board is paid monthly, but ancillary services, veterinary reimbursements, and training fees create prolonged cash lag—forcing the owner to act as an involuntary lender.
+                        </p>
+                    </div>
+                    <div class="p-5 bg-sand/20 rounded-xl border border-mutedBorder/60">
+                        <div class="text-rust font-bold text-sm uppercase tracking-wide mb-2">2. The Growth Paradox</div>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                            Expansion requires immediate upfront capital investments in labor, equipment, and facility capacity before generating new revenue. Rapid growth accelerates cash consumption much faster than it generates cash returns, frequently inducing bankruptcy.
+                        </p>
+                    </div>
+                    <div class="p-5 bg-sand/20 rounded-xl border border-mutedBorder/60">
+                        <div class="text-rust font-bold text-sm uppercase tracking-wide mb-2">3. Uncontrollable Volatility</div>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                            Agricultural businesses lack deep institutional capital reserves. Sudden hay price spikes, emergency repairs after winter storms, or client churn directly threaten monthly operational survival, forcing reliance on high-interest personal credit cards.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: ENTITY COMPARISON ================= -->
+        <section id="section-entities" class="hidden space-y-8">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-sand/60 border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <span class="inline-block px-3 py-1 bg-forest/10 text-forest text-xs font-bold uppercase tracking-wider rounded-full mb-3">Part II: Structural Analysis</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate mb-3">Deconstructing Financial Entities</h2>
+                <p class="text-slate/80 leading-relaxed text-sm sm:text-base">
+                    Evaluating a small business owner's lifestyle using corporate salary benchmarks or inherited wealth models is structurally invalid. Corporate executives, trust fund beneficiaries, and sole proprietors exist in fundamentally different macroeconomic ecosystems with radically disparate tax obligations, overhead burdens, and liability exposures.
+                </p>
+            </div>
+
+            <!-- Comparison Table & Interactive Income Visualizer -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Visualizer Chart -->
+                <div class="lg:col-span-5 bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-serif font-bold text-lg text-slate mb-1">The $200,000 Revenue Illusion</h3>
+                        <p class="text-xs text-slate/70 mb-4">Comparing actual retained personal income from $200,000 in gross revenue or compensation across legal structures.</p>
+                        <div class="chart-container">
+                            <canvas id="entityIncomeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-sand/40 rounded-lg text-xs text-slate/80">
+                        <strong>Takeaway:</strong> A sole proprietor with $200k top-line revenue retains only $10k–$20k after operating overhead, COGS, and 15.3% self-employment taxes—whereas a corporate executive retains the vast majority.
+                    </div>
+                </div>
+
+                <!-- Structured Comparison Cards -->
+                <div class="lg:col-span-7 space-y-4">
+                    <!-- Corporate Exec Card -->
+                    <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:border-forest transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-serif font-bold text-base text-slate">🏢 W-2 Corporate Executive</h4>
+                            <span class="px-2 py-1 bg-forest/10 text-forest text-xs font-bold rounded">High Stability & Protection</span>
+                        </div>
+                        <ul class="text-xs sm:text-sm text-slate/80 space-y-1.5 list-disc list-inside">
+                            <li><strong>Income Mechanism:</strong> Guaranteed bi-weekly salary & bonuses, insulated from client delays.</li>
+                            <li><strong>Personal Overhead:</strong> $0. Employer provides office space, software, equipment, and staff.</li>
+                            <li><strong>Benefits & Taxes:</strong> Employer subsidizes 50% of payroll taxes, 401(k) matches, and healthcare.</li>
+                            <li><strong>Liability Shield:</strong> Complete personal asset protection. Worst case is job loss with severance.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Trust Fund Card -->
+                    <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:border-ochre transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-serif font-bold text-base text-slate">🏛️ Trust Fund Beneficiary</h4>
+                            <span class="px-2 py-1 bg-ochre/10 text-ochre text-xs font-bold rounded">Capital Preservation</span>
+                        </div>
+                        <ul class="text-xs sm:text-sm text-slate/80 space-y-1.5 list-disc list-inside">
+                            <li><strong>Income Mechanism:</strong> Passive yields, dividends, and market appreciation requiring zero daily labor.</li>
+                            <li><strong>Tax Advantage:</strong> Favorable long-term capital gains (max 20%), QSBS $15M exclusions, trust stacking.</li>
+                            <li><strong>Asset Protection:</strong> Irrevocable trusts & BDITs shield capital from creditors and personal lawsuits.</li>
+                            <li><strong>Friction:</strong> Zero facility maintenance, customer acquisition, or operational stress.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Sole Proprietorship Card -->
+                    <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm hover:border-rust transition">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-serif font-bold text-base text-slate">🚜 Equestrian Sole Proprietor</h4>
+                            <span class="px-2 py-1 bg-rust/10 text-rust text-xs font-bold rounded">Maximum Friction & Risk</span>
+                        </div>
+                        <ul class="text-xs sm:text-sm text-slate/80 space-y-1.5 list-disc list-inside">
+                            <li><strong>Income Mechanism:</strong> Highly variable daily operational cash flow, subject to season and churn.</li>
+                            <li><strong>Tax Burden:</strong> Pass-through ordinary income rates PLUS 15.3% self-employment tax (Schedule C/F).</li>
+                            <li><strong>Reinvestment Imperative:</strong> 90%+ of revenue cannibalized by feed, labor, lease, and repairs.</li>
+                            <li><strong>Liability Risk:</strong> Unlimited personal liability—personal home and savings exposed to 1,200 lb animal hazards.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 4: BAY AREA HEADWINDS ================= -->
+        <section id="section-headwinds" class="hidden space-y-8">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-sand/60 border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <span class="inline-block px-3 py-1 bg-rust/10 text-rust text-xs font-bold uppercase tracking-wider rounded-full mb-3">Part III: Regional Macroeconomics</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate mb-3">San Francisco Bay Area Headwinds</h2>
+                <p class="text-slate/80 leading-relaxed text-sm sm:text-base">
+                    Operating an agricultural enterprise anywhere in the U.S. is challenging, but doing so in the San Francisco Bay Area exposes small businesses to some of the highest regulatory, real estate, and labor pressures in the nation. This section examines key local headwinds that compress profit margins to thin single digits.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Land Use Crisis Card -->
+                <div class="bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="text-3xl mb-3">🌲</div>
+                        <h3 class="font-serif font-bold text-xl text-slate mb-2">Land & Development Crisis</h3>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed mb-4">
+                            The Bay Area has lost 217,000 acres of agricultural land over the past 30 years—7 times the area of San Francisco. Facilities like Golden Gate Fields ($175M sale) and Bear Creek Stables ($10.5M repair needs) highlight the constant threat of commercial conversion and high carrying costs.
+                        </p>
+                    </div>
+                    <div class="p-3 bg-sand/40 rounded-xl text-xs text-slate/70">
+                        <strong>Williamson Act Impact:</strong> Offers property tax relief for 10-year agricultural commitments, but state subvention cuts since 2009 have weakened county support.
+                    </div>
+                </div>
+
+                <!-- Labor & AB 1066 Card -->
+                <div class="bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="text-3xl mb-3">⏱️</div>
+                        <h3 class="font-serif font-bold text-xl text-slate mb-2">Assembly Bill 1066 Impact</h3>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed mb-4">
+                            Passed in 2016, AB 1066 phased out the historic agricultural overtime exemption (10 hr/day, 60 hr/wk) and mandated standard 8 hr/day, 40 hr/wk thresholds (reaching small employers by 2025).
+                        </p>
+                    </div>
+                    <div class="p-3 bg-sand/40 rounded-xl text-xs text-slate/70">
+                        <strong>Animal Reality Conflict:</strong> Livestock require early morning and evening care 7 days a week. Forced overtime premiums drastically inflate base payroll costs.
+                    </div>
+                </div>
+
+                <!-- Workers' Comp Card -->
+                <div class="bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="text-3xl mb-3">🩹</div>
+                        <h3 class="font-serif font-bold text-xl text-slate mb-2">Workers' Comp Class 8631</h3>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed mb-4">
+                            Due to high physical risk, equestrian labor carries a projected Workers' Compensation rate of $10.13 per $100 of payroll in California.
+                        </p>
+                    </div>
+                    <div class="p-3 bg-sand/40 rounded-xl text-xs text-slate/70">
+                        <strong>Comparison:</strong> Standard office clerical workers (Class 8810) carry a rate of just $0.28 per $100 payroll—making equestrian labor 36x more expensive in insurance premiums alone.
+                    </div>
+                </div>
+            </div>
+
+            <!-- AB 1066 Phase-In Timeline Visualizer -->
+            <div class="bg-white border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
+                <h3 class="font-serif font-bold text-lg text-slate">AB 1066 Overtime Threshold Phase-In Timeline (Small Employers: ≤25 Workers)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-center">
+                    <div class="p-4 bg-sand/30 border border-mutedBorder rounded-xl">
+                        <div class="text-xs font-bold text-slate/60">2022</div>
+                        <div class="text-base font-bold text-slate mt-1">9.5 hrs/day</div>
+                        <div class="text-xs text-slate/70">55 hrs/week</div>
+                    </div>
+                    <div class="p-4 bg-sand/30 border border-mutedBorder rounded-xl">
+                        <div class="text-xs font-bold text-slate/60">2023</div>
+                        <div class="text-base font-bold text-slate mt-1">9.0 hrs/day</div>
+                        <div class="text-xs text-slate/70">50 hrs/week</div>
+                    </div>
+                    <div class="p-4 bg-sand/30 border border-mutedBorder rounded-xl">
+                        <div class="text-xs font-bold text-slate/60">2024</div>
+                        <div class="text-base font-bold text-slate mt-1">8.5 hrs/day</div>
+                        <div class="text-xs text-slate/70">45 hrs/week</div>
+                    </div>
+                    <div class="p-4 bg-rust/10 border border-rust/40 rounded-xl">
+                        <div class="text-xs font-bold text-rust">2025 Standard</div>
+                        <div class="text-base font-bold text-rust mt-1">8.0 hrs/day</div>
+                        <div class="text-xs text-rust/80 font-medium">40 hrs/week (Full Threshold)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 5: EQUESTRIAN MICROECONOMICS ================= -->
+        <section id="section-microeconomics" class="hidden space-y-8">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-sand/60 border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <span class="inline-block px-3 py-1 bg-forest/10 text-forest text-xs font-bold uppercase tracking-wider rounded-full mb-3">Part IV: Industry Microeconomics</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate mb-3">The Microeconomics of Horse Boarding & Care</h2>
+                <p class="text-slate/80 leading-relaxed text-sm sm:text-base">
+                    While the equine industry contributes $11.6 billion annually to California's economy, micro-level facility economics are constrained by fixed stall capacities, volatile agricultural supply chains, and strict IRS regulations. Explore the interactive cost breakdown and audit risk parameters below.
+                </p>
+            </div>
+
+            <!-- Cost Breakdown & Facility Ceiling -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Doughnut Chart -->
+                <div class="lg:col-span-6 bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm">
+                    <h3 class="font-serif font-bold text-lg text-slate mb-1">Standard Facility Operating Cost Allocation</h3>
+                    <p class="text-xs text-slate/70 mb-4">Empirical expense distribution for horse boarding and training operations.</p>
+                    <div class="chart-container">
+                        <canvas id="costBreakdownChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Macro & Micro Constraints Cards -->
+                <div class="lg:col-span-6 space-y-4">
+                    <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm">
+                        <h4 class="font-serif font-bold text-base text-slate mb-2">🏥 Veterinary Shortage & Pathogen Risk</h4>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                            The U.S. has lost 90% of its large animal veterinarians since WWII (Johns Hopkins 2023 study). Scarcity inflates farm call rates, while localized outbreaks of Equine Herpes Virus (EHV-1) or Infectious Anemia can force total facility quarantines, instantly erasing annual profits.
+                        </p>
+                    </div>
+
+                    <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm">
+                        <h4 class="font-serif font-bold text-base text-slate mb-2">⚖️ Internal Revenue Code § 183 "Hobby Loss Rule"</h4>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed mb-2">
+                            The IRS scrutinizes equine operations with recurring net losses to disallow business deductions.
+                        </p>
+                        <div class="bg-sand/40 p-3 rounded-lg text-xs space-y-1">
+                            <div><strong>Safe Harbor Presumption:</strong> Must generate net profit in <u>2 out of 7</u> consecutive tax years.</div>
+                            <div class="text-rust"><strong>Risk (Schumacher v. Comm.):</strong> Disallowance of losses can lead to severe retroactive tax claims and penalties.</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-mutedBorder rounded-xl p-5 shadow-sm">
+                        <h4 class="font-serif font-bold text-base text-slate mb-2">📐 The Fixed-Capacity Capacity Trap</h4>
+                        <p class="text-xs sm:text-sm text-slate/80 leading-relaxed">
+                            Unlike tech platforms with zero marginal cost per user, a 30-stall barn faces a hard physical ceiling on revenue. When occupancy dips below 85%, fixed lease, utility, and labor costs quickly push operations into severe loss.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive IRS Section 183 Checklist -->
+            <div class="bg-white border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <h3 class="font-serif font-bold text-xl text-slate mb-2">IRS 9-Factor Audit Compliance Checklist</h3>
+                <p class="text-xs sm:text-sm text-slate/70 mb-4">Click checklist items to evaluate an equine business's profit motive defense against the IRS Hobby Loss Rule:</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs" id="irs-checklist">
+                    <!-- Populated dynamically or statically styled -->
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>1. Businesslike manner & formal bookkeeping</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>2. Expertise of owner and advisors</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>3. Time and effort expended by owner</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>4. Expectation of asset appreciation</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>5. Success in other business activities</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>6. History of income or losses</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>7. Amount of occasional profits earned</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>8. Financial status of the owner</span>
+                    </label>
+                    <label class="flex items-start space-x-2 p-3 bg-sand/30 rounded-lg border border-mutedBorder cursor-pointer hover:bg-sand/60 transition">
+                        <input type="checkbox" class="irs-cb rounded text-rust mt-0.5" onchange="updateIrsScore()">
+                        <span>9. Absence of personal pleasure elements</span>
+                    </label>
+                </div>
+                <div class="mt-4 p-3 bg-sand/60 rounded-xl flex justify-between items-center">
+                    <span class="text-xs font-semibold text-slate">Audit Defense Rating:</span>
+                    <span id="irs-score-badge" class="px-3 py-1 bg-rust/20 text-rust text-xs font-bold rounded-full">High Audit Risk (0/9 Checklist Items)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 6: LIVE SIMULATOR ================= -->
+        <section id="section-simulator" class="hidden space-y-8">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-sand/60 border border-mutedBorder rounded-2xl p-6 sm:p-8 shadow-sm">
+                <span class="inline-block px-3 py-1 bg-rust text-white text-xs font-bold uppercase tracking-wider rounded-full mb-3">Interactive Sandbox</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate mb-3">Equestrian Facility Economics Simulator</h2>
+                <p class="text-slate/80 leading-relaxed text-sm sm:text-base">
+                    Test operational variables to understand why keeping a Bay Area equestrian small business profitable requires rigorous financial maneuvering. Adjust the parameters below to dynamically update monthly profit margins, break-even occupancy, and IRS audit risk.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <!-- Control Panel -->
+                <div class="lg:col-span-5 bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm space-y-5">
+                    <h3 class="font-serif font-bold text-lg text-slate pb-2 border-b border-mutedBorder">Facility Variables</h3>
+
+                    <!-- Stall Capacity Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate mb-1">
+                            <span>Stall Capacity:</span>
+                            <span id="val-stalls" class="font-bold text-rust">30 Stalls</span>
+                        </div>
+                        <input type="range" id="sim-stalls" min="10" max="60" value="30" step="5" class="w-full accent-rust" oninput="runSimulation()">
+                    </div>
+
+                    <!-- Board Rate Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate mb-1">
+                            <span>Monthly Board Rate per Stall:</span>
+                            <span id="val-board" class="font-bold text-rust">$1,250</span>
+                        </div>
+                        <input type="range" id="sim-board" min="800" max="2200" value="1250" step="50" class="w-full accent-rust" oninput="runSimulation()">
+                    </div>
+
+                    <!-- Occupancy Rate Slider -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate mb-1">
+                            <span>Facility Occupancy Rate:</span>
+                            <span id="val-occupancy" class="font-bold text-rust">85%</span>
+                        </div>
+                        <input type="range" id="sim-occupancy" min="50" max="100" value="85" step="5" class="w-full accent-rust" oninput="runSimulation()">
+                    </div>
+
+                    <!-- Hay Inflation Adjustment -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate mb-1">
+                            <span>Hay & Feed Cost Surcharge:</span>
+                            <span id="val-hay" class="font-bold text-rust">+15%</span>
+                        </div>
+                        <input type="range" id="sim-hay" min="0" max="50" value="15" step="5" class="w-full accent-rust" oninput="runSimulation()">
+                    </div>
+
+                    <!-- AB 1066 Overtime Labor Factor -->
+                    <div>
+                        <div class="flex justify-between text-xs font-medium text-slate mb-1">
+                            <span>AB 1066 Overtime Impact:</span>
+                            <span id="val-labor" class="font-bold text-rust">+20%</span>
+                        </div>
+                        <input type="range" id="sim-labor" min="0" max="40" value="20" step="5" class="w-full accent-rust" oninput="runSimulation()">
+                    </div>
+                </div>
+
+                <!-- Real-time Output & Chart -->
+                <div class="lg:col-span-7 bg-white border border-mutedBorder rounded-2xl p-6 shadow-sm space-y-6">
+                    <h3 class="font-serif font-bold text-lg text-slate">Simulated Monthly Financial Performance</h3>
+
+                    <!-- KPI Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="p-3 bg-sand/30 rounded-xl border border-mutedBorder">
+                            <div class="text-xs text-slate/60 font-medium">Gross Monthly Rev</div>
+                            <div id="sim-gross" class="text-lg font-bold text-slate mt-1">$31,875</div>
+                        </div>
+                        <div class="p-3 bg-sand/30 rounded-xl border border-mutedBorder">
+                            <div class="text-xs text-slate/60 font-medium">Operating Expenses</div>
+                            <div id="sim-opex" class="text-lg font-bold text-rust mt-1">$29,450</div>
+                        </div>
+                        <div class="p-3 bg-sand/30 rounded-xl border border-mutedBorder col-span-2 sm:col-span-1">
+                            <div class="text-xs text-slate/60 font-medium">Net Monthly Margin</div>
+                            <div id="sim-net" class="text-lg font-bold text-forest mt-1">$2,425 (7.6%)</div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Occupancy Sensitivity Chart -->
+                    <div>
+                        <div class="text-xs font-semibold text-slate mb-2">Occupancy Sensitivity vs. Profit Margin</div>
+                        <div class="chart-container">
+                            <canvas id="sensitivityChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="sim-status-box" class="p-4 rounded-xl text-xs leading-relaxed border bg-forest/10 border-forest/30 text-forest">
+                        <!-- Dynamic commentary text -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-sand/60 border-t border-mutedBorder py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate/70 space-y-1">
+            <p class="font-medium text-slate">Equestrian Small Business Economics & Macro Analysis Dashboard</p>
+            <p>Data Source Context: Bureau of Labor Statistics (BLS), SBA Office of Advocacy, U.S. Bank Small Business Studies, American Horse Council (AHC 2023), California Dept. of Industrial Relations.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // State Management
+        let activeTab = 'overview';
+        let survivalChartInstance = null;
+        let entityChartInstance = null;
+        let costChartInstance = null;
+        let sensitivityChartInstance = null;
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            initSurvivalChart();
+            initEntityChart();
+            initCostChart();
+            initSensitivityChart();
+            runSimulation();
+        });
+
+        // Tab Switching Handler
+        function switchTab(tabId) {
+            activeTab = tabId;
+            const sections = ['overview', 'survival', 'entities', 'headwinds', 'microeconomics', 'simulator'];
+            
+            sections.forEach(sec => {
+                const el = document.getElementById(`section-${sec}`);
+                if (sec === tabId) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+
+                // Update Header Tab Buttons styling
+                const btn = document.getElementById(`tab-${sec}`);
+                if (btn) {
+                    if (sec === tabId) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+
+            // Trigger chart update / re-render for responsive sizing inside newly unhidden containers
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        // --- Chart 1: Business Survival Rate Chart ---
+        function initSurvivalChart() {
+            const ctx = document.getElementById('survivalChart').getContext('2d');
+            survivalChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 5', 'Year 10', 'Year 15', 'Year 30+'],
+                    datasets: [
+                        {
+                            label: 'US National Business Survival Rate (%)',
+                            data: [79.6, 70.0, 51.4, 34.7, 25.0, 12.6],
+                            borderColor: '#3B5249',
+                            backgroundColor: 'rgba(59, 82, 73, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'California Business Survival Rate (%)',
+                            data: [81.5, 71.0, 53.8, 35.5, null, null],
+                            borderColor: '#B85B35',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.3,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}% active`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            ticks: { callback: value => value + '%' },
+                            grid: { color: '#EAE5DF' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Chart 2: $200k Net Income Comparison Chart ---
+        function initEntityChart() {
+            const ctx = document.getElementById('entityIncomeChart').getContext('2d');
+            entityChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['W-2 Corporate Exec', 'Trust Beneficiary', 'Sole Proprietor'],
+                    datasets: [
+                        {
+                            label: 'Gross Compensation / Revenue ($)',
+                            data: [200000, 200000, 200000],
+                            backgroundColor: '#E3DAC9'
+                        },
+                        {
+                            label: 'Estimated Retained Personal Income ($)',
+                            data: [138000, 160000, 18000],
+                            backgroundColor: ['#3B5249', '#C88A35', '#B85B35']
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: $${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { callback: value => '$' + (value/1000) + 'k' },
+                            grid: { color: '#EAE5DF' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // --- Chart 3: Facility Operating Cost Allocations ---
+        function initCostChart() {
+            const ctx = document.getElementById('costBreakdownChart').getContext('2d');
+            costChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        'Feed & Bedding (29%)',
+                        'Labor & Payroll (24%)',
+                        'Facility Lease/Mortgage (23%)',
+                        'Utilities & Insurance (13%)',
+                        'Admin & Waste Hauling (11%)'
+                    ],
+                    datasets: [{
+                        data: [29, 24, 23, 13, 11],
+                        backgroundColor: ['#C88A35', '#B85B35', '#2C3531', '#3B5249', '#E3DAC9'],
+                        borderWidth: 2,
+                        borderColor: '#FBF9F5'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        // --- Chart 4: Live Sensitivity Chart ---
+        function initSensitivityChart() {
+            const ctx = document.getElementById('sensitivityChart').getContext('2d');
+            sensitivityChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['50%', '60%', '70%', '80%', '85%', '90%', '100%'],
+                    datasets: [{
+                        label: 'Monthly Net Margin ($)',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#B85B35',
+                        backgroundColor: 'rgba(184, 91, 53, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            ticks: { callback: value => '$' + value },
+                            grid: { color: '#EAE5DF' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // Dynamic Simulation Handler
+        function runSimulation() {
+            const stalls = parseInt(document.getElementById('sim-stalls').value);
+            const board = parseInt(document.getElementById('sim-board').value);
+            const occupancy = parseInt(document.getElementById('sim-occupancy').value);
+            const haySur = parseInt(document.getElementById('sim-hay').value);
+            const laborSur = parseInt(document.getElementById('sim-labor').value);
+
+            // Update UI Slider Label Text
+            document.getElementById('val-stalls').innerText = `${stalls} Stalls`;
+            document.getElementById('val-board').innerText = `$${board.toLocaleString()}`;
+            document.getElementById('val-occupancy').innerText = `${occupancy}%`;
+            document.getElementById('val-hay').innerText = `+${haySur}%`;
+            document.getElementById('val-labor').innerText = `+${laborSur}%`;
+
+            // Calculate Base Monthly Operating Financials
+            const activeHorses = Math.round(stalls * (occupancy / 100));
+            const grossRev = activeHorses * board;
+
+            // Expense Models per Stall
+            const baseFeedCost = 350 * (1 + haySur / 100);
+            const baseLaborCost = 300 * (1 + laborSur / 100);
+            const fixedFacilityCost = stalls * 320; // Fixed per stall capacity overhead
+            const utilitiesWaste = stalls * 150;
+
+            const totalOpEx = Math.round((activeHorses * (baseFeedCost + baseLaborCost)) + fixedFacilityCost + utilitiesWaste);
+            const netProfit = grossRev - totalOpEx;
+            const marginPct = grossRev > 0 ? ((netProfit / grossRev) * 100).toFixed(1) : 0;
+
+            // Render Key Indicators
+            document.getElementById('sim-gross').innerText = `$${grossRev.toLocaleString()}`;
+            document.getElementById('sim-opex').innerText = `$${totalOpEx.toLocaleString()}`;
+            
+            const netEl = document.getElementById('sim-net');
+            if (netProfit >= 0) {
+                netEl.innerText = `$${netProfit.toLocaleString()} (${marginPct}%)`;
+                netEl.className = 'text-lg font-bold text-forest mt-1';
+            } else {
+                netEl.innerText = `-$${Math.abs(netProfit).toLocaleString()} (${marginPct}%)`;
+                netEl.className = 'text-lg font-bold text-rust mt-1';
+            }
+
+            // Update Dynamic Sensitivity Chart Points
+            const occLevels = [0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 1.0];
+            const netCurve = occLevels.map(occ => {
+                const horses = Math.round(stalls * occ);
+                const g = horses * board;
+                const o = Math.round((horses * (baseFeedCost + baseLaborCost)) + fixedFacilityCost + utilitiesWaste);
+                return g - o;
+            });
+
+            if (sensitivityChartInstance) {
+                sensitivityChartInstance.data.datasets[0].data = netCurve;
+                sensitivityChartInstance.update();
+            }
+
+            // Dynamic Status Commentary
+            const statusBox = document.getElementById('sim-status-box');
+            if (netProfit < 0) {
+                statusBox.className = "p-4 rounded-xl text-xs leading-relaxed border bg-rust/10 border-rust/30 text-rust";
+                statusBox.innerHTML = `<strong>⚠️ Operating Loss Detected:</strong> Fixed facility leases and inflated feed/labor expenses exceed current revenue. Without deep credit reserves or price hikes, this facility faces cash asphyxiation within months.`;
+            } else if (marginPct < 10) {
+                statusBox.className = "p-4 rounded-xl text-xs leading-relaxed border bg-ochre/10 border-ochre/30 text-ochre";
+                statusBox.innerHTML = `<strong>⚡ Razor-Thin Single-Digit Margin (${marginPct}%):</strong> Operations are barely breaking even. A single horse turnover, hay price increase, or emergency veterinary repair will plunge monthly cash flow into loss.`;
+            } else {
+                statusBox.className = "p-4 rounded-xl text-xs leading-relaxed border bg-forest/10 border-forest/30 text-forest";
+                statusBox.innerHTML = `<strong>✅ Healthy Operational Margin (${marginPct}%):</strong> High occupancy and rate optimization cover fixed land overhead and AB 1066 labor costs. Ensure 2 out of 7 tax years show net gains to withstand IRS § 183 scrutiny.`;
+            }
+        }
+
+        // Update IRS Checklist Badge Status
+        function updateIrsScore() {
+            const checkboxes = document.querySelectorAll('.irs-cb');
+            let checkedCount = 0;
+            checkboxes.forEach(cb => { if (cb.checked) checkedCount++; });
+
+            const badge = document.getElementById('irs-score-badge');
+            if (checkedCount >= 7) {
+                badge.className = "px-3 py-1 bg-forest/20 text-forest text-xs font-bold rounded-full";
+                badge.innerText = `Strong Profit Defense (${checkedCount}/9 Checklist Items)`;
+            } else if (checkedCount >= 4) {
+                badge.className = "px-3 py-1 bg-ochre/20 text-ochre text-xs font-bold rounded-full";
+                badge.innerText = `Moderate Audit Exposure (${checkedCount}/9 Checklist Items)`;
+            } else {
+                badge.className = "px-3 py-1 bg-rust/20 text-rust text-xs font-bold rounded-full";
+                badge.innerText = `High Audit Risk (${checkedCount}/9 Checklist Items)`;
+            }
+        }
+    </script>
+</body>
+</html>
